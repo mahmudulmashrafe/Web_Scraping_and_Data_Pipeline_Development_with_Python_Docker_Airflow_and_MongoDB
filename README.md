@@ -4,10 +4,14 @@ This project demonstrates how to set up a data pipeline using MongoDB, Python, a
 
 ## Project Structure
 
-. ├── dags/ │ ├── init.py │ └── finn_scraper_dag.py ├── src/ │ ├── init.py │ ├── search.py │ ├── scrape.py │ ├── process.py │ ├── check_existing.py │ └── upload.py ├── docker-compose.yml ├── Dockerfile └── requirements.txt
-
-markdown
-Copy
+. ├── dags/ 
+  │├── src/ 
+  │|└── search.py 
+  │|└──scrape.py 
+  │|└── process.py 
+  │|└── check_existing.py 
+  │|└── upload.py 
+  │ └── finn_scraper_dag.py
 
 ## Prerequisites
 
@@ -32,8 +36,8 @@ Access Apache Airflow Web Interface:
 
 Once the services are up, you can access the Apache Airflow web interface at http://localhost:8080. The default credentials are:
 
-Username: airflow
-Password: airflow
+Username: legacy
+Password: legacy
 Configure MongoDB Connection in Airflow:
 
 Navigate to the Airflow web interface.
@@ -96,12 +100,12 @@ services:
 Python Dependencies
 The requirements.txt file includes the necessary Python packages:
 
-Copy
 requests
 beautifulsoup4
-pymongo
-apache-airflow
+
+
 DAG Details
+
 The Airflow Directed Acyclic Graph (DAG) finn_scraper_dag consists of the following tasks:
 
 Search New Ads: Fetches new real estate advertisements from Finn.no.
@@ -115,12 +119,12 @@ To access the MongoDB instance:
 Connect via Mongo Shell:
 
 bash
-Copy
+
 docker exec -it <container_id_or_name> mongo -u root -p root --authenticationDatabase admin
 Connect via Python:
 
 python
-Copy
+
 from pymongo import MongoClient
 
 client = MongoClient('mongodb://root:root@localhost:27017/')
