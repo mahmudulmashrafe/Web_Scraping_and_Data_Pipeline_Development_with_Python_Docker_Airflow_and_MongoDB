@@ -1,22 +1,68 @@
-# Web Scraping using MongoDB, Python, and Apache Airflow Integration
+# Web Scraping and Data Pipeline Development
 
-This project demonstrates how to set up a data pipeline using MongoDB, Python, and Apache Airflow, all orchestrated with Docker Compose. The pipeline fetches real estate advertisements from [Finn.no](https://www.finn.no/realestate/newbuildings/search.html), processes the data, and stores it in a MongoDB database.
+This repository contains a web scraping and data pipeline project built using **Python**, **Docker**, **Apache Airflow**, and **MongoDB**. The pipeline scrapes real estate data from the [finn.no](https://www.finn.no/realestate/newbuildings/search.html) website, processes it, and stores it in a MongoDB database.
+
+## Objective
+
+The primary goal is to demonstrate the integration of web scraping, data processing, and data storage, all orchestrated via an Airflow pipeline. This project also ensures reusability and modularity of the codebase.
+
+---
+
+## Features
+
+1. **Web Scraping**:
+   - Extracts daily new building advertisements from the `finn.no` website.
+   - Fetches essential details such as:
+     - Heading and Sub-Heading.
+     - Key information (Nøkkelinfo) and Matrikkelinformasjon as key-value pairs.
+     - Facilities in a structured format: `{ 'facilities': ['Heis', 'Hage', 'Sentralt', ...] }`.
+     - FinnCode and Date.
+
+2. **Data Processing**:
+   - Each advertisement is stored as a document in MongoDB with the `FinnCode` as `_id`.
+   - Duplicate records are checked and skipped to ensure data integrity.
+
+3. **Data Pipeline with Airflow**:
+   - The pipeline is defined using an **Airflow DAG**:
+     - **Tasks**:
+       1. Search new ads.
+       2. Scrape new ads.
+       3. Process new ads.
+       4. Check existing ads.
+       5. Upload new ads.
+     - Scheduled to run daily at **2:30 PM**.
+
+4. **Dockerized Environment**:
+   - The project includes a Dockerized Airflow setup to simplify deployment and scaling.
+
+---
 
 ## Project Structure
+. ├── dags/ │├── src/ │|└── search.py │|└──scrape.py │|└── process.py │|└── check_existing.py │|└── upload.py │ └── finn_scraper_dag.py
 
-. ├── dags/ 
-  │├── src/ 
-  │|└── search.py 
-  │|└──scrape.py 
-  │|└── process.py 
-  │|└── check_existing.py 
-  │|└── upload.py 
-  │ └── finn_scraper_dag.py
+
+- **dags/FinnScrapper**: Contains the Airflow DAG and associated scripts.
+- **docker-compose.yml**: Docker configuration for Airflow and MongoDB.
+- **.env**: Environment variables for sensitive data (e.g., database connection string).
+
+---
 
 ## Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+1. **Python 3.8+**
+2. **Docker & Docker Compose**
+3. **MongoDB** (Local or Cloud-hosted)
+4. **Apache Airflow**
+
+---
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/web-scraping-data-pipeline.git
+   cd web-scraping-data-pipeline
+
 
 ## Setup and Installation
 
@@ -25,113 +71,28 @@ This project demonstrates how to set up a data pipeline using MongoDB, Python, a
    ```bash
    git clone <repository_url>
    cd <repository_directory>
+
+   
 Build and Start the Services:
 
-bash
-Copy
-docker-compose up --build
+docker compose up
 This command builds the Docker images and starts the services defined in docker-compose.yml.
 
 Access Apache Airflow Web Interface:
 
-Once the services are up, you can access the Apache Airflow web interface at http://localhost:8080. The default credentials are:
-
+Once the services are up, you can access the Apache Airflow web interface at http://localhost:2423. The default credentials are:
 Username: legacy
 Password: legacy
-Configure MongoDB Connection in Airflow:
 
-Navigate to the Airflow web interface.
-Go to Admin > Connections.
-Click on + to add a new connection with the following details:
-Conn Id: mongo_default
-Conn Type: MongoDB
-Host: mongo
-Schema: finn_data
-Login: root
-Password: root
-Port: 27017
-Run the DAG:
+## Usage
+Place the FinnScrapper folder inside the Airflow dags/ directory.
+Verify that the DAG finn_scrapper_dag is visible in the Airflow UI.
+Enable the DAG to schedule daily runs.
 
-In the Airflow web interface, navigate to the DAGs tab.
-Find the finn_scraper_dag and trigger it.
-Docker Compose Configuration
-The docker-compose.yml file defines the following services:
+## Resources
+BeautifulSoup Documentation
+MongoDB Official Site
+Apache Airflow Documentation
 
-mongo: MongoDB service running on port 27017.
-airflow: Apache Airflow services, including the web server, scheduler, and worker.
-yaml
-Copy
-version: '3.8'
-
-services:
-  mongo:
-    image: mongo:latest
-    command: ["mongod", "--port", "27017"]
-    ports:
-      - "27017:27017"
-    healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
-      timeout: 40s
-      retries: 5
-    restart: always
-
-  airflow:
-    image: apache/airflow:2.7.2-python3.11
-    environment:
-      - AIRFLOW_UID=50000
-      - AIRFLOW_GID=0
-      - AIRFLOW_HOME=/opt/airflow
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
-      - AIRFLOW__CORE__LOAD_EXAMPLES=False
-      - AIRFLOW__WEBSERVER__RBAC=True
-      - AIRFLOW__WEBSERVER__AUTHENTICATE=True
-      - AIRFLOW__WEBSERVER__AUTH_BACKENDS=airflow.contrib.auth.backends.password_auth
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
-      - ./plugins:/opt/airflow/plugins
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mongo
-    restart: always
-Python Dependencies
-The requirements.txt file includes the necessary Python packages:
-
-requests
-beautifulsoup4
-
-
-DAG Details
-
-The Airflow Directed Acyclic Graph (DAG) finn_scraper_dag consists of the following tasks:
-
-Search New Ads: Fetches new real estate advertisements from Finn.no.
-Scrape New Ads: Extracts detailed information from the fetched advertisements.
-Process New Ads: Processes the scraped data for storage.
-Check Existing Ads: Compares the processed data with existing records in MongoDB to avoid duplicates.
-Upload New Ads: Inserts the new advertisements into the MongoDB database.
-Accessing MongoDB
-To access the MongoDB instance:
-
-Connect via Mongo Shell:
-
-bash
-
-docker exec -it <container_id_or_name> mongo -u root -p root --authenticationDatabase admin
-Connect via Python:
-
-python
-
-from pymongo import MongoClient
-
-client = MongoClient('mongodb://root:root@localhost:27017/')
-db = client['finn_data']
-collection = db['real_estate']
-Notes
-Ensure that Docker and Docker Compose are installed and running on your machine.
-The project uses the latest versions of MongoDB and Apache Airflow.
-The default MongoDB username and password are both set to root.
-The Airflow web interface is accessible at [http://localhost:808
+## Contributing
+Contributions are welcome! Feel free to fork the repository and submit a pull request.
