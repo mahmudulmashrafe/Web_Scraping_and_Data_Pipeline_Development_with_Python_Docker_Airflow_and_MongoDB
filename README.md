@@ -1,4 +1,4 @@
-# MongoDB, Python, and Apache Airflow Integration
+# Web Scraping using MongoDB, Python, and Apache Airflow Integration
 
 This project demonstrates how to set up a data pipeline using MongoDB, Python, and Apache Airflow, all orchestrated with Docker Compose. The pipeline fetches real estate advertisements from [Finn.no](https://www.finn.no/realestate/newbuildings/search.html), processes the data, and stores it in a MongoDB database.
 
