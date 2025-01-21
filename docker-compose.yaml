@@ -62,7 +62,7 @@ services:
     image: mongo:latest
     command: ["mongod", "--port", "27017"]
     ports:
-      - 27017:27017
+      - 27018:27017
     healthcheck:
       test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
       interval: 5s
