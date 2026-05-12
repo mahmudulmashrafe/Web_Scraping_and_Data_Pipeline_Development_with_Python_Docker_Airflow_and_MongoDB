@@ -94,5 +94,5 @@ BeautifulSoup Documentation
 MongoDB Official Site
 Apache Airflow Documentation
 
-## Contributing
+## Contributions
 Contributions are welcome! Feel free to fork the repository and submit a pull request.
